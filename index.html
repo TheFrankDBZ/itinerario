@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protección Civil Moctezuma - Agenda y Cotizador (2026-2027)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pcOrange: { DEFAULT: '#ea580c', dark: '#c2410c', light: '#ffedd5' },
+            pcNavy: { DEFAULT: '#0f172a', card: '#1e293b', light: '#334155' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; color: black !important; }
+      .print-shadow-none { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+      .page-break { page-break-before: always; }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+
+  <!-- Header principal -->
+  <header class="bg-slate-950 border-b border-slate-800 sticky top-0 z-40 shadow-xl no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-pcOrange p-2.5 rounded-lg text-white font-bold text-2xl shadow-lg flex items-center justify-center w-12 h-12">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold text-white tracking-wide">PROTECCIÓN CIVIL MOCTEZUMA, SONORA</h1>
+          <p class="text-xs text-orange-400 font-medium">Sistema de Calendarización e Itinerario de Recursos (Oct 2026 – Dic 2027)</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-semibold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-file-excel"></i> Exportar CSV
+        </button>
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-2 rounded-lg font-semibold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-print"></i> Reporte PDF / Imprimir
+        </button>
+        <button onclick="resetData()" class="bg-slate-800 hover:bg-red-900 text-slate-300 hover:text-white text-xs px-3 py-2 rounded-lg border border-slate-700 transition">
+          <i class="fa-solid fa-rotate-left"></i> Restablecer
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Banner Diagnóstico de Riesgos -->
+    <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4 sm:p-5 shadow-lg relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 opacity-10 text-orange-500 text-9xl pointer-events-none">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div class="relative z-10">
+        <h2 class="text-base font-bold text-orange-400 uppercase tracking-wider mb-1">
+          <i class="fa-solid fa-location-dot"></i> Diagnóstico Operativo Regional
+        </h2>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          <strong class="text-white">Moctezuma, Sonora:</strong> Por su ubicación (sierra, río Moctezuma, clima semiárido), los riesgos prioritarios son 
+          <span class="text-orange-300 font-semibold">lluvias e inundaciones en arroyos (verano)</span>, 
+          <span class="text-amber-300 font-semibold">ondas de calor</span>, 
+          <span class="text-cyan-300 font-semibold">heladas (invierno)</span>, 
+          <span class="text-red-400 font-semibold">incendios de pastizal (primavera)</span> y 
+          <span class="text-purple-300 font-semibold">concentraciones masivas en festividades</span>. Los huracanes del Pacífico impactan como remanentes con crecidas de río.
+        </p>
+      </div>
+    </div>
+
+    <!-- TARJETAS DE RESUMEN METRICO (KPIs) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 no-print">
+      <div class="bg-slate-800 border-l-4 border-orange-500 p-4 rounded-xl shadow">
+        <div class="text-xs font-medium text-slate-400 uppercase">Presupuesto Estimado Total</div>
+        <div class="text-2xl font-black text-orange-400 mt-1" id="kpi-total-budget">$0 MXN</div>
+        <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-calculator"></i> Basado en partidas cotizadas</div>
+      </div>
+      <div class="bg-slate-800 border-l-4 border-blue-500 p-4 rounded-xl shadow">
+        <div class="text-xs font-medium text-slate-400 uppercase">Total Actividades Programadas</div>
+        <div class="text-2xl font-black text-blue-400 mt-1" id="kpi-total-activities">0</div>
+        <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-list-check"></i> En 15 meses de operativo</div>
+      </div>
+      <div class="bg-slate-800 border-l-4 border-emerald-500 p-4 rounded-xl shadow">
+        <div class="text-xs font-medium text-slate-400 uppercase">Período Operativo</div>
+        <div class="text-xl font-bold text-emerald-400 mt-1">Oct 2026 – Dic 2027</div>
+        <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-calendar"></i> 15 Meses contínuos</div>
+      </div>
+      <div class="bg-slate-800 border-l-4 border-purple-500 p-4 rounded-xl shadow">
+        <div class="text-xs font-medium text-slate-400 uppercase">Actividades Permanentes</div>
+        <div class="text-2xl font-black text-purple-400 mt-1">5 Programas</div>
+        <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-arrows-spin"></i> Activas todo el año</div>
+      </div>
+    </div>
+
+    <!-- PESTAÑAS DE NAVEGACIÓN -->
+    <div class="border-b border-slate-700 flex flex-wrap gap-2 no-print">
+      <button onclick="switchTab('calendar')" id="tab-calendar" class="px-4 py-2.5 font-semibold text-sm rounded-t-lg transition bg-orange-600 text-white border-b-2 border-orange-400">
+        <i class="fa-solid fa-calendar-days mr-1.5"></i> Calendarización por Meses
+      </button>
+      <button onclick="switchTab('budget')" id="tab-budget" class="px-4 py-2.5 font-semibold text-sm rounded-t-lg transition text-slate-400 hover:text-white">
+        <i class="fa-solid fa-coins mr-1.5"></i> Cotizador & Desglose de Gastos
+      </button>
+      <button onclick="switchTab('permanent')" id="tab-permanent" class="px-4 py-2.5 font-semibold text-sm rounded-t-lg transition text-slate-400 hover:text-white">
+        <i class="fa-solid fa-arrows-spin mr-1.5"></i> Actividades Permanentes
+      </button>
+      <button onclick="switchTab('report')" id="tab-report" class="px-4 py-2.5 font-semibold text-sm rounded-t-lg transition text-slate-400 hover:text-white">
+        <i class="fa-solid fa-file-contract mr-1.5"></i> Resumen Formal Imprimible
+      </button>
+    </div>
+
+    <!-- SECCIÓN 1: VISTA DE CALENDARIZACIÓN -->
+    <section id="sec-calendar" class="space-y-4">
+      <!-- Filtros y Buscador -->
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap items-center justify-between gap-4 no-print">
+        <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <div class="relative w-full sm:w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+            <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Buscar actividad o contexto..." class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-orange-500">
+          </div>
+          <select id="riskFilter" onchange="applyFilters()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-orange-500">
+            <option value="ALL">Todos los Tipos de Riesgo</option>
+            <option value="Lluvias/Huracanes">Lluvias, Monzón e Inundaciones</option>
+            <option value="Heladas">Heladas y Bajas Temperaturas</option>
+            <option value="Incendios">Incendios de Pastizal y Forestales</option>
+            <option value="Eventos Masivos">Eventos Masivos y Fiestas</option>
+          </select>
+        </div>
+        <div class="text-xs text-slate-400 font-medium">
+          Mostrando <span id="visible-count" class="text-orange-400 font-bold">15</span> meses
+        </div>
+      </div>
+
+      <!-- Tarjetas de Meses -->
+      <div id="months-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Renderizado dinámico vía JavaScript -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: COTIZADOR Y DESGLOSE DE GASTOS -->
+    <section id="sec-budget" class="hidden space-y-4">
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-md">
+        <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+          <div>
+            <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-calculator text-orange-500 mr-2"></i>Matriz General de Cotización de Recursos</h3>
+            <p class="text-xs text-slate-400">Desglose de gasolina, equipo, consumibles y logística por mes para Protección Civil Moctezuma</p>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-slate-400">Total Global Estimado</div>
+            <div class="text-2xl font-black text-emerald-400" id="matrix-grand-total">$0.00 MXN</div>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300 border-collapse">
+            <thead class="bg-slate-950 text-slate-200 uppercase font-bold text-[11px] border-b border-slate-700">
+              <tr>
+                <th class="p-3">Mes / Período</th>
+                <th class="p-3">Insumos Cotizados</th>
+                <th class="p-3 text-right">Subtotal Estimado</th>
+                <th class="p-3 text-center no-print">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="budget-table-body" class="divide-y divide-slate-700">
+              <!-- Renderizado dinámico -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: ACTIVIDADES PERMANENTES -->
+    <section id="sec-permanent" class="hidden space-y-4">
+      <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-md">
+        <div class="flex items-center gap-3 mb-4 border-b border-slate-700 pb-3">
+          <div class="bg-purple-600/20 text-purple-400 p-2.5 rounded-lg text-xl">
+            <i class="fa-solid fa-arrows-spin"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white">Actividades Permanentes de Protección Civil</h3>
+            <p class="text-xs text-slate-400">Operaciones continuas que se ejecutan durante todo el año en Moctezuma, Sonora</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="permanent-list">
+          <!-- Renderizado con JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: INFORME FORMAL PARA IMPRESIÓN -->
+    <section id="sec-report" class="hidden space-y-6 bg-white text-slate-900 p-8 rounded-xl shadow-xl print-shadow-none">
+      <div class="border-b-2 border-slate-900 pb-4 flex justify-between items-center">
+        <div>
+          <h2 class="text-xl font-black uppercase text-slate-900">DIRECCIÓN MUNICIPAL DE PROTECCIÓN CIVIL</h2>
+          <h3 class="text-md font-bold text-slate-700">H. Ayuntamiento de Moctezuma, Sonora</h3>
+          <p class="text-xs text-slate-500 mt-1">Programa Operativo y Cotización Estimada (Octubre 2026 – Diciembre 2027)</p>
+        </div>
+        <div class="text-right text-xs text-slate-600">
+          <p><strong>Fecha de emisión:</strong> <span id="report-date"></span></p>
+          <p><strong>Ubicación:</strong> Moctezuma, Sonora</p>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-sm text-slate-800 uppercase mb-2">1. Resumen Ejecutivo del Programa</h4>
+        <p class="text-xs text-slate-700 leading-relaxed">
+          El presente documento establece la planificación operativa y la estimación presupuestal de insumos para la atención de emergencias, mitigación de riesgos de origen natural (crecidas del Río Moctezuma, temperaturas extremas, incendios forestales) y la cobertura de concentraciones masivas en el Municipio de Moctezuma, Sonora.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-sm text-slate-800 uppercase mb-2">2. Presupuesto Consolidado por Período</h4>
+        <table class="w-full text-xs text-left border border-slate-300 border-collapse">
+          <thead>
+            <tr class="bg-slate-100 border-b border-slate-300 font-bold">
+              <th class="p-2 border-r border-slate-300">Mes</th>
+              <th class="p-2 border-r border-slate-300">Contexto y Enfoque de Riesgo</th>
+              <th class="p-2 border-r border-slate-300">Actividades Clave</th>
+              <th class="p-2 text-right">Subtotal MXN</th>
+            </tr>
+          </thead>
+          <tbody id="report-table-body" class="divide-y divide-slate-300">
+            <!-- Dinámico -->
+          </tbody>
+          <tfoot>
+            <tr class="bg-slate-200 font-bold border-t border-slate-400">
+              <td colspan="3" class="p-2 text-right">PRESUPUESTO TOTAL ESTIMADO:</td>
+              <td class="p-2 text-right text-sm font-black" id="report-grand-total">$0.00 MXN</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="pt-12 grid grid-cols-2 gap-12 text-center text-xs">
+        <div>
+          <div class="border-t border-slate-800 pt-2 font-bold">Titular de Protección Civil Municipal</div>
+          <div class="text-slate-500">Moctezuma, Sonora</div>
+        </div>
+        <div>
+          <div class="border-t border-slate-800 pt-2 font-bold">Presidente Municipal / Secretaría</div>
+          <div class="text-slate-500">H. Ayuntamiento de Moctezuma</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: AGREGAR / EDITAR INSUMO DE COTIZACIÓN -->
+  <div id="expenseModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-lg w-full p-5 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 class="text-md font-bold text-white" id="modal-title"><i class="fa-solid fa-plus text-orange-500 mr-2"></i>Agregar Insumo de Cotización</h3>
+        <button onclick="closeExpenseModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      
+      <form id="expenseForm" onsubmit="handleSaveExpense(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="modal-month-id">
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">Concepto / Descripción del Insumo</label>
+          <input type="text" id="expense-concept" required placeholder="Ej. Combustible Gasolina para recorridos" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-orange-500">
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Cantidad</label>
+            <input type="number" step="0.01" id="expense-qty" required placeholder="100" oninput="calcModalTotal()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-orange-500">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Unidad</label>
+            <input type="text" id="expense-unit" required placeholder="litros / pza" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-orange-500">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Costo Unitario ($)</label>
+            <input type="number" step="0.01" id="expense-cost" required placeholder="24.50" oninput="calcModalTotal()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-orange-500">
+          </div>
+        </div>
+        <div class="p-2.5 bg-slate-900 rounded-lg flex justify-between items-center text-xs">
+          <span class="text-slate-400 font-semibold">Total Estimado Partida:</span>
+          <span class="text-emerald-400 font-bold text-sm" id="modal-calculated-total">$0.00 MXN</span>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeExpenseModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-200">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 rounded-lg text-white font-bold">Guardar Insumo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: AGREGAR NUEVA ACTIVIDAD -->
+  <div id="activityModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-md w-full p-5 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 class="text-md font-bold text-white"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>Nueva Actividad Operativa</h3>
+        <button onclick="closeActivityModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      
+      <form id="activityForm" onsubmit="handleSaveActivity(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="act-month-id">
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">Descripción de la Actividad de PC</label>
+          <textarea id="act-desc" rows="3" required placeholder="Ej. Operativo especial de inspección de refugios en comunidades rurales..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-blue-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeActivityModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-200">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-bold">Agregar Actividad</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT DE LA APLICACIÓN -->
+  <script>
+    // DATOS INICIALES BASADOS EN EL DOCUMENTO DE MOCTEZUMA, SONORA
+    const INITIAL_DATA = [
+      {
+        id: "oct-2026",
+        month: "Octubre 2026",
+        period: "Q4 2026",
+        context: "Fin de monzón, cola de temporada de huracanes, regreso a clases.",
+        riskType: "Lluvias/Huracanes",
+        activities: [
+          "Vigilancia de remanentes de tormentas tropicales",
+          "Limpieza y desazolve de arroyos y drenes",
+          "Revisión de refugios temporales",
+          "Simulacros escolares de evacuación",
+          "Inspección de negocios y Programas Internos"
+        ],
+        expenses: [
+          { concept: "Combustible inspección y desazolve", qty: 250, unitCost: 24.50, unit: "litros" },
+          { concept: "Herramientas manuales de limpieza (palas, costales)", qty: 10, unitCost: 350, unit: "piezas" }
+        ]
+      },
+      {
+        id: "nov-2026",
+        month: "Noviembre 2026",
+        period: "Q4 2026",
+        context: "Día de Muertos (1–2), Desfile del 20 de noviembre, cierre de temporada de huracanes (30 nov), primeros frentes fríos, Fiesta de la Talabartería.",
+        riskType: "Eventos Masivos",
+        activities: [
+          "Operativo en panteones (aforo, tránsito, primeros auxilios)",
+          "Apoyo y seguridad logística en desfile del 20 de noviembre",
+          "Balance de cierre de temporada de lluvias",
+          "Preparación del Plan Invernal Municipal",
+          "Cobertura en la Fiesta de la Talabartería"
+        ],
+        expenses: [
+          { concept: "Combustible patrullaje y panteones", qty: 200, unitCost: 24.50, unit: "litros" },
+          { concept: "Cinta de balizamiento y conos", qty: 5, unitCost: 450, unit: "lotes" },
+          { concept: "Hidratación y suero para brigadistas", qty: 10, unitCost: 180, unit: "cajas" }
+        ]
+      },
+      {
+        id: "dic-2026",
+        month: "Diciembre 2026",
+        period: "Q4 2026",
+        context: "Fiestas de la Virgen de Guadalupe (12), posadas, Navidad, Año Nuevo, heladas, carreras.",
+        riskType: "Heladas",
+        activities: [
+          "Operativo Guadalupano y de peregrinaciones en carretera",
+          "Revisión de pirotecnia y ferias navideñas",
+          "Campaña de prevención de incendios domésticos y manejo de calefactores / CO",
+          "Instalación de refugios para bajas temperaturas"
+        ],
+        expenses: [
+          { concept: "Combustible carreteras y albergues", qty: 300, unitCost: 24.50, unit: "litros" },
+          { concept: "Cobijas térmicas para albergados", qty: 30, unitCost: 250, unit: "piezas" },
+          { concept: "Folletos informativos intoxicación CO", qty: 1000, unitCost: 2.50, unit: "impresiones" }
+        ]
+      },
+      {
+        id: "ene-2027",
+        month: "Enero 2027",
+        period: "Q1 2027",
+        context: "Reyes (6), heladas más fuertes, cierre y evaluación del año.",
+        riskType: "Heladas",
+        activities: [
+          "Operativo de Reyes",
+          "Atención a población vulnerable por frío (adultos mayores, comunidades rurales)",
+          "Elaboración del Informe Anual de Protección Civil",
+          "Actualización del Atlas de Riesgos y del Plan Municipal"
+        ],
+        expenses: [
+          { concept: "Gasolina recorridos rurales y heladas", qty: 280, unitCost: 24.50, unit: "litros" },
+          { concept: "Café, pan y despensas para albergue temporal", qty: 40, unitCost: 120, unit: "raciones" },
+          { concept: "Impresión de Atlas de Riesgos Municipal", qty: 3, unitCost: 850, unit: "tomos" }
+        ]
+      },
+      {
+        id: "feb-2027",
+        month: "Febrero 2027",
+        period: "Q1 2027",
+        context: "Frentes fríos, San Valentín, inicio de la vigilancia de pastizales secos, carreras.",
+        riskType: "Incendios",
+        activities: [
+          "Capacitación a brigadistas y voluntarios",
+          "Mantenimiento de equipo de respuesta y vehículos",
+          "Campaña de prevención de quemas agrícolas sin control"
+        ],
+        expenses: [
+          { concept: "Mantenimiento preventivo unidad de PC", qty: 1, unitCost: 4200, unit: "servicio" },
+          { concept: "Combustible patrullaje preventivo de pastizales", qty: 180, unitCost: 24.50, unit: "litros" }
+        ]
+      },
+      {
+        id: "mar-2027",
+        month: "Marzo 2027",
+        period: "Q1 2027",
+        context: "Semana Santa (21–28 mar), inicio de temporada de incendios.",
+        riskType: "Incendios",
+        activities: [
+          "Operativo vacacional (ríos, presas, carreteras, eventos religiosos)",
+          "Apertura de brechas cortafuego y coordinación con ejidos y ganaderos"
+        ],
+        expenses: [
+          { concept: "Combustible intenso operativo Semana Santa", qty: 380, unitCost: 24.50, unit: "litros" },
+          { concept: "Herramientas de combate forestal (batefuegos, palas)", qty: 6, unitCost: 1200, unit: "piezas" }
+        ]
+      },
+      {
+        id: "abr-2027",
+        month: "Abril 2027",
+        period: "Q2 2027",
+        context: "Día del Niño (30), temporada de incendios forestales, posible simulacro.",
+        riskType: "Incendios",
+        activities: [
+          "Simulacro comunitario o escolar",
+          "Combate y prevención activa de incendios",
+          "Talleres preventivos en escuelas de la cabecera y comunidades"
+        ],
+        expenses: [
+          { concept: "Combustible para combate de incendios", qty: 350, unitCost: 24.50, unit: "litros" },
+          { concept: "Raciones secas y suero para combatientes", qty: 30, unitCost: 150, unit: "kits" }
+        ]
+      },
+      {
+        id: "may-2027",
+        month: "Mayo 2027",
+        period: "Q2 2027",
+        context: "Día de las Madres (10), graduaciones, calor creciente, inicia temporada de huracanes del Pacífico (15 may), carreras.",
+        riskType: "Lluvias/Huracanes",
+        activities: [
+          "Operativo en eventos masivos de graduación y Día de las Madres",
+          "Plan de Contingencia por Temporada de Lluvias y Huracanes",
+          "Revisión de refugios, albergues y directorio de emergencia"
+        ],
+        expenses: [
+          { concept: "Combustible recorridos de inspección", qty: 220, unitCost: 24.50, unit: "litros" },
+          { concept: "Señalética e insumos para albergues", qty: 1, unitCost: 2500, unit: "lote" }
+        ]
+      },
+      {
+        id: "jun-2027",
+        month: "Junio 2027",
+        period: "Q2 2027",
+        context: "Ondas de calor, inicio del monzón (15 jun), fin de ciclo escolar, La mesa: Cabalgata, Carreras.",
+        riskType: "Lluvias/Huracanes",
+        activities: [
+          "Campaña de hidratación y prevención por golpe de calor",
+          "Monitoreo de pronóstico y niveles del Río Moctezuma",
+          "Capacitación en evacuación y rescate acuático/superficie",
+          "Seguridad en Cabalgata La Mesa y carreras"
+        ],
+        expenses: [
+          { concept: "Garrafones de agua, sueros y hielo", qty: 20, unitCost: 200, unit: "kits" },
+          { concept: "Combustible monitoreo del río y cabalgata", qty: 300, unitCost: 24.50, unit: "litros" },
+          { concept: "Chalecos salvavidas y cuerdas de rescate", qty: 4, unitCost: 1100, unit: "piezas" }
+        ]
+      },
+      {
+        id: "jul-2027",
+        month: "Julio 2027",
+        period: "Q3 2027",
+        context: "Monzón, tormentas eléctricas, vacaciones de verano.",
+        riskType: "Lluvias/Huracanes",
+        activities: [
+          "Vigilancia de arroyos y vados del municipio",
+          "Sistema de alertamiento temprano a la población",
+          "Cierre precautorio de cruces peligrosos e inundables",
+          "Vigilancia en balnearios y ríos en vacaciones"
+        ],
+        expenses: [
+          { concept: "Combustible para guardia y monitoreo 24/7", qty: 400, unitCost: 24.50, unit: "litros" },
+          { concept: "Banderolas y barreras para vados inundables", qty: 6, unitCost: 650, unit: "unidades" }
+        ]
+      },
+      {
+        id: "ago-2027",
+        month: "Agosto 2027",
+        period: "Q3 2027",
+        context: "Pico de lluvias y de temporada de huracanes, regreso a clases, El Llano: Cabalgata.",
+        riskType: "Lluvias/Huracanes",
+        activities: [
+          "Operativo 'Regreso a Clases' (revisión de escuelas y tránsito escolar)",
+          "Atención de daños y evaluación de afectaciones por lluvias",
+          "Operativo preventivo en Cabalgata El Llano"
+        ],
+        expenses: [
+          { concept: "Combustible atenciones de emergencia", qty: 380, unitCost: 24.50, unit: "litros" },
+          { concept: "Impermeables de alto tráfico para personal", qty: 6, unitCost: 750, unit: "piezas" }
+        ]
+      },
+      {
+        id: "sep-2027",
+        month: "Septiembre 2027",
+        period: "Q3 2027",
+        context: "Fiestas patrias (15–16), Día Nacional de Protección Civil (19 sept), Simulacro Nacional, Carreras.",
+        riskType: "Eventos Masivos",
+        activities: [
+          "Operativo de Grito de Independencia y eventos masivos",
+          "Participación y coordinación del Simulacro Nacional del 19 Sept",
+          "Cierre de temporada activa de monzón"
+        ],
+        expenses: [
+          { concept: "Combustible operativo eventos y simulacro", qty: 250, unitCost: 24.50, unit: "litros" },
+          { concept: "Extintores de PQS 6kg (recarga e inspección)", qty: 4, unitCost: 450, unit: "servicios" }
+        ]
+      },
+      {
+        id: "oct-2027",
+        month: "Octubre 2027",
+        period: "Q4 2027",
+        context: "Fin de monzón, transición otoño, inicio de bajas temperaturas nocturnas.",
+        riskType: "Heladas",
+        activities: [
+          "Inspección de cauces post-monzón",
+          "Simulacros escolares de evacuación",
+          "Revisión preventiva de calefactores y negocios"
+        ],
+        expenses: [
+          { concept: "Combustible para inspecciones", qty: 200, unitCost: 24.50, unit: "litros" }
+        ]
+      },
+      {
+        id: "nov-2027",
+        month: "Noviembre 2027",
+        period: "Q4 2027",
+        context: "Día de Muertos, Desfile 20 de Noviembre, Fiesta de la Talabartería, primeros frentes fríos.",
+        riskType: "Eventos Masivos",
+        activities: [
+          "Operativo panteones y desfile",
+          "Balance de temporada por inundaciones",
+          "Activación del Plan Invernal Municipal"
+        ],
+        expenses: [
+          { concept: "Combustible patrullaje panteones", qty: 210, unitCost: 24.50, unit: "litros" }
+        ]
+      },
+      {
+        id: "dic-2027",
+        month: "Diciembre 2027",
+        period: "Q4 2027",
+        context: "Fiestas Guadalupanas, Posadas, Navidad, Año Nuevo, heladas intensas.",
+        riskType: "Heladas",
+        activities: [
+          "Operativo invernal y carretero",
+          "Control de pirotecnia y ferias",
+          "Refugios temporales por heladas"
+        ],
+        expenses: [
+          { concept: "Combustible albergues y operativo invernal", qty: 320, unitCost: 24.50, unit: "litros" },
+          { concept: "Suministros de apoyo social por frío", qty: 1, unitCost: 4000, unit: "lote" }
+        ]
+      }
+    ];
+
+    const PERMANENT_ACTIVITIES = [
+      {
+        title: "Inspección y Verificación",
+        desc: "Inspección y verificación de establecimientos comerciales, bailes, ferias y eventos masivos en Moctezuma.",
+        icon: "fa-clipboard-check",
+        color: "text-blue-400"
+      },
+      {
+        title: "Capacitación a la Comunidad",
+        desc: "Cursos de primeros auxilios, RCP, búsqueda y evacuación para escuelas, empresas y la comunidad.",
+        icon: "fa-graduation-cap",
+        color: "text-emerald-400"
+      },
+      {
+        title: "Simulacros Trimestrales",
+        desc: "Realización de simulacros escolares de evacuación (al menos uno por trimestre) en instituciones del municipio.",
+        icon: "fa-bell-concierge",
+        color: "text-amber-400"
+      },
+      {
+        title: "Coordinación Interinstitucional",
+        desc: "Enlace constante con Bomberos, Cruz Roja, Seguridad Pública, CFE y la Dirección Estatal de Protección Civil.",
+        icon: "fa-handshake",
+        color: "text-purple-400"
+      },
+      {
+        title: "Atención a Emergencias y Bitácora",
+        desc: "Atención inmediata a llamados de auxilio 24/7 con registro y bitácora mensual de incidencias.",
+        icon: "fa-truck-medical",
+        color: "text-red-400"
+      }
+    ];
+
+    // ESTADO DE LA APLICACIÓN
+    let appData = JSON.parse(localStorage.getItem('pc_moctezuma_data')) || INITIAL_DATA;
+
+    // INICIALIZACIÓN
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('report-date').innerText = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+      renderAll();
+    });
+
+    function renderAll() {
+      renderKPIs();
+      renderMonths();
+      renderBudgetMatrix();
+      renderPermanents();
+      renderReport();
+      saveData();
+    }
+
+    function saveData() {
+      localStorage.setItem('pc_moctezuma_data', JSON.stringify(appData));
+    }
+
+    function resetData() {
+      if (confirm('¿Deseas restablecer todos los datos e insumos a los valores originales predeterminados?')) {
+        appData = JSON.parse(JSON.stringify(INITIAL_DATA));
+        renderAll();
+      }
+    }
+
+    // CÁLCULOS PRESUPUESTALES
+    function getMonthSubtotal(month) {
+      if (!month.expenses) return 0;
+      return month.expenses.reduce((acc, curr) => acc + (curr.qty * curr.unitCost), 0);
+    }
+
+    function getGrandTotal() {
+      return appData.reduce((acc, m) => acc + getMonthSubtotal(m), 0);
+    }
+
+    function getTotalActivitiesCount() {
+      return appData.reduce((acc, m) => acc + (m.activities ? m.activities.length : 0), 0);
+    }
+
+    // RENDERIZADO DE KPIs
+    function renderKPIs() {
+      document.getElementById('kpi-total-budget').innerText = `$${getGrandTotal().toLocaleString('es-MX', {minimumFractionDigits:2})} MXN`;
+      document.getElementById('kpi-total-activities').innerText = getTotalActivitiesCount();
+    }
+
+    // BADGES DE RIESGO
+    function getRiskBadgeHTML(type) {
+      switch(type) {
+        case 'Lluvias/Huracanes':
+          return `<span class="bg-blue-900/80 text-blue-300 border border-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-cloud-showers-heavy mr-1"></i>Lluvias / Monzón</span>`;
+        case 'Heladas':
+          return `<span class="bg-cyan-900/80 text-cyan-300 border border-cyan-700 text-[10px] px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-snowflake mr-1"></i>Heladas / Frío</span>`;
+        case 'Incendios':
+          return `<span class="bg-red-900/80 text-red-300 border border-red-700 text-[10px] px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-fire mr-1"></i>Incendios Pastizal</span>`;
+        case 'Eventos Masivos':
+          return `<span class="bg-purple-900/80 text-purple-300 border border-purple-700 text-[10px] px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-people-group mr-1"></i>Eventos Masivos</span>`;
+        default:
+          return `<span class="bg-slate-700 text-slate-300 text-[10px] px-2 py-0.5 rounded-full font-bold">General</span>`;
+      }
+    }
+
+    // RENDERIZADO DE TARJETAS DE MESES
+    function renderMonths() {
+      const container = document.getElementById('months-container');
+      container.innerHTML = '';
+
+      const searchVal = document.getElementById('searchInput').value.toLowerCase();
+      const riskVal = document.getElementById('riskFilter').value;
+
+      let visibleCount = 0;
+
+      appData.forEach(m => {
+        const matchesSearch = m.month.toLowerCase().includes(searchVal) ||
+                              m.context.toLowerCase().includes(searchVal) ||
+                              m.activities.some(a => a.toLowerCase().includes(searchVal));
+        const matchesRisk = (riskVal === 'ALL') || (m.riskType === riskVal);
+
+        if (matchesSearch && matchesRisk) {
+          visibleCount++;
+          const subtotal = getMonthSubtotal(m);
+
+          let activitiesHTML = m.activities.map(act => `
+            <li class="flex items-start gap-2 text-xs text-slate-300">
+              <i class="fa-solid fa-circle-check text-orange-500 text-[10px] mt-1 shrink-0"></i>
+              <span>${act}</span>
+            </li>
+          `).join('');
+
+          let card = document.createElement('div');
+          card.className = "bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col justify-between shadow-lg hover:border-orange-500/50 transition";
+          card.innerHTML = `
+            <div>
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${m.period}</span>
+                  <h3 class="text-base font-extrabold text-white">${m.month}</h3>
+                </div>
+                ${getRiskBadgeHTML(m.riskType)}
+              </div>
+
+              <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50 mb-3 text-xs text-slate-300">
+                <strong class="text-orange-400 block mb-0.5"><i class="fa-solid fa-compass"></i> Contexto Regional:</strong>
+                ${m.context}
+              </div>
+
+              <div class="space-y-2 mb-4">
+                <div class="flex justify-between items-center">
+                  <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider"><i class="fa-solid fa-list text-orange-500 mr-1"></i> Actividades de PC:</h4>
+                  <button onclick="openActivityModal('${m.id}')" class="text-[10px] text-blue-400 hover:text-blue-300 font-semibold"><i class="fa-solid fa-plus"></i> Agregar</button>
+                </div>
+                <ul class="space-y-1.5 pl-1">
+                  ${activitiesHTML}
+                </ul>
+              </div>
+            </div>
+
+            <div class="border-t border-slate-700 pt-3 flex justify-between items-center mt-2 bg-slate-900/40 p-2 rounded-lg">
+              <div>
+                <span class="text-[10px] text-slate-400 block font-semibold">Subtotal Insumos:</span>
+                <span class="text-sm font-black text-emerald-400">$${subtotal.toLocaleString('es-MX', {minimumFractionDigits:2})} MXN</span>
+              </div>
+              <button onclick="openExpenseModal('${m.id}')" class="bg-orange-600 hover:bg-orange-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition shadow">
+                <i class="fa-solid fa-coins"></i> Cotizar Mes
+              </button>
+            </div>
+          `;
+          container.appendChild(card);
+        }
+      });
+
+      document.getElementById('visible-count').innerText = visibleCount;
+    }
+
+    function applyFilters() {
+      renderMonths();
+    }
+
+    // RENDERIZADO DE MATRIZ DE PRESUPUESTO
+    function renderBudgetMatrix() {
+      const tbody = document.getElementById('budget-table-body');
+      tbody.innerHTML = '';
+
+      appData.forEach(m => {
+        const subtotal = getMonthSubtotal(m);
+
+        let itemsListHTML = '';
+        if (m.expenses && m.expenses.length > 0) {
+          itemsListHTML = m.expenses.map((exp, idx) => `
+            <div class="flex justify-between items-center py-1 border-b border-slate-800 text-[11px]">
+              <span class="text-slate-300"><i class="fa-solid fa-angle-right text-orange-500 mr-1"></i>${exp.concept} (${exp.qty} ${exp.unit} x $${exp.unitCost})</span>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-200">$${(exp.qty * exp.unitCost).toLocaleString('es-MX', {minimumFractionDigits:2})}</span>
+                <button onclick="deleteExpenseItem('${m.id}', ${idx})" class="text-red-400 hover:text-red-300 text-[10px] no-print" title="Eliminar insumo"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          itemsListHTML = `<span class="text-slate-500 italic text-[11px]">Sin partidas de insumos cotizadas para este mes.</span>`;
+        }
+
+        let tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/50 transition";
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-white whitespace-nowrap align-top">
+            ${m.month}
+            <div class="text-[10px] font-normal text-slate-400">${m.period}</div>
+          </td>
+          <td class="p-3 align-top">
+            <div class="space-y-1">${itemsListHTML}</div>
+          </td>
+          <td class="p-3 text-right font-black text-emerald-400 align-top whitespace-nowrap">
+            $${subtotal.toLocaleString('es-MX', {minimumFractionDigits:2})}
+          </td>
+          <td class="p-3 text-center align-top whitespace-nowrap no-print">
+            <button onclick="openExpenseModal('${m.id}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-[11px] px-2.5 py-1 rounded font-semibold transition">
+              <i class="fa-solid fa-plus text-orange-400"></i> Cotizar
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('matrix-grand-total').innerText = `$${getGrandTotal().toLocaleString('es-MX', {minimumFractionDigits:2})} MXN`;
+    }
+
+    // RENDERIZADO DE ACTIVIDADES PERMANENTES
+    function renderPermanents() {
+      const container = document.getElementById('permanent-list');
+      container.innerHTML = PERMANENT_ACTIVITIES.map(p => `
+        <div class="bg-slate-900 border border-slate-700/80 p-4 rounded-xl flex items-start gap-3">
+          <div class="${p.color} text-2xl p-2 bg-slate-800 rounded-lg shrink-0">
+            <i class="fa-solid ${p.icon}"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-sm mb-1">${p.title}</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">${p.desc}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // RENDERIZADO DE REPORTE IMPRIMIBLE
+    function renderReport() {
+      const tbody = document.getElementById('report-table-body');
+      tbody.innerHTML = '';
+
+      appData.forEach(m => {
+        const subtotal = getMonthSubtotal(m);
+        let tr = document.createElement('tr');
+        tr.className = "text-[11px]";
+        tr.innerHTML = `
+          <td class="p-2 border-r border-slate-300 font-bold whitespace-nowrap">${m.month}</td>
+          <td class="p-2 border-r border-slate-300 text-slate-700">${m.context}</td>
+          <td class="p-2 border-r border-slate-300 text-slate-700">
+            <ul class="list-disc pl-3 space-y-0.5">
+              ${m.activities.map(a => `<li>${a}</li>`).join('')}
+            </ul>
+          </td>
+          <td class="p-2 text-right font-bold text-slate-900 whitespace-nowrap">$${subtotal.toLocaleString('es-MX', {minimumFractionDigits:2})}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('report-grand-total').innerText = `$${getGrandTotal().toLocaleString('es-MX', {minimumFractionDigits:2})} MXN`;
+    }
+
+    // CONTROL DE PESTAÑAS
+    function switchTab(tab) {
+      ['calendar', 'budget', 'permanent', 'report'].forEach(t => {
+        document.getElementById(`sec-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-${t}`);
+        btn.classList.remove('bg-orange-600', 'text-white', 'border-b-2', 'border-orange-400');
+        btn.classList.add('text-slate-400');
+      });
+
+      document.getElementById(`sec-${tab}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-${tab}`);
+      activeBtn.classList.remove('text-slate-400');
+      activeBtn.classList.add('bg-orange-600', 'text-white', 'border-b-2', 'border-orange-400');
+    }
+
+    // LÓGICA DE MODAL DE INSUMOS
+    function openExpenseModal(monthId) {
+      document.getElementById('modal-month-id').value = monthId;
+      const monthObj = appData.find(m => m.id === monthId);
+      document.getElementById('modal-title').innerText = `Agregar Insumo para: ${monthObj.month}`;
+      document.getElementById('expenseForm').reset();
+      document.getElementById('modal-calculated-total').innerText = "$0.00 MXN";
+      document.getElementById('expenseModal').classList.remove('hidden');
+    }
+
+    function closeExpenseModal() {
+      document.getElementById('expenseModal').classList.add('hidden');
+    }
+
+    function calcModalTotal() {
+      const qty = parseFloat(document.getElementById('expense-qty').value) || 0;
+      const cost = parseFloat(document.getElementById('expense-cost').value) || 0;
+      const total = qty * cost;
+      document.getElementById('modal-calculated-total').innerText = `$${total.toLocaleString('es-MX', {minimumFractionDigits:2})} MXN`;
+    }
+
+    function handleSaveExpense(e) {
+      e.preventDefault();
+      const monthId = document.getElementById('modal-month-id').value;
+      const concept = document.getElementById('expense-concept').value;
+      const qty = parseFloat(document.getElementById('expense-qty').value) || 0;
+      const unit = document.getElementById('expense-unit').value;
+      const unitCost = parseFloat(document.getElementById('expense-cost').value) || 0;
+
+      const monthObj = appData.find(m => m.id === monthId);
+      if (monthObj) {
+        if (!monthObj.expenses) monthObj.expenses = [];
+        monthObj.expenses.push({ concept, qty, unit, unitCost });
+        renderAll();
+        closeExpenseModal();
+      }
+    }
+
+    function deleteExpenseItem(monthId, index) {
+      const monthObj = appData.find(m => m.id === monthId);
+      if (monthObj && monthObj.expenses) {
+        monthObj.expenses.splice(index, 1);
+        renderAll();
+      }
+    }
+
+    // LÓGICA DE MODAL DE ACTIVIDADES
+    function openActivityModal(monthId) {
+      document.getElementById('act-month-id').value = monthId;
+      document.getElementById('activityForm').reset();
+      document.getElementById('activityModal').classList.remove('hidden');
+    }
+
+    function closeActivityModal() {
+      document.getElementById('activityModal').classList.add('hidden');
+    }
+
+    function handleSaveActivity(e) {
+      e.preventDefault();
+      const monthId = document.getElementById('act-month-id').value;
+      const desc = document.getElementById('act-desc').value;
+
+      const monthObj = appData.find(m => m.id === monthId);
+      if (monthObj) {
+        monthObj.activities.push(desc);
+        renderAll();
+        closeActivityModal();
+      }
+    }
+
+    // EXPORTAR A CSV
+    function exportToCSV() {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "Mes,Periodo,Tipo Riesgo,Concepto Insumo,Cantidad,Unidad,Costo Unitario MXN,Subtotal MXN\n";
+
+      appData.forEach(m => {
+        if (m.expenses && m.expenses.length > 0) {
+          m.expenses.forEach(e => {
+            const row = `"${m.month}","${m.period}","${m.riskType}","${e.concept.replace(/"/g, '""')}",${e.qty},"${e.unit}",${e.unitCost},${e.qty * e.unitCost}`;
+            csvContent += row + "\n";
+          });
+        } else {
+          const row = `"${m.month}","${m.period}","${m.riskType}","Sin insumos cotizados",0,"N/A",0,0`;
+          csvContent += row + "\n";
+        }
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `cotizacion_proteccion_civil_moctezuma.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
