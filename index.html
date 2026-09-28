@@ -98,12 +98,12 @@
       <div class="bg-slate-800 border-l-4 border-blue-500 p-4 rounded-xl shadow">
         <div class="text-xs font-medium text-slate-400 uppercase">Total Actividades Programadas</div>
         <div class="text-2xl font-black text-blue-400 mt-1" id="kpi-total-activities">0</div>
-        <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-list-check"></i> En 15 meses de operativo</div>
+        <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-list-check"></i> En <span id="kpi-months">15</span> meses de operativo</div>
       </div>
       <div class="bg-slate-800 border-l-4 border-emerald-500 p-4 rounded-xl shadow">
         <div class="text-xs font-medium text-slate-400 uppercase">Período Operativo</div>
-        <div class="text-xl font-bold text-emerald-400 mt-1">Oct 2026 – Dic 2027</div>
-        <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-calendar"></i> 15 Meses contínuos</div>
+        <div class="text-xl font-bold text-emerald-400 mt-1" id="kpi-period">Oct 2026 – Dic 2027</div>
+        <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-calendar"></i> <span id="kpi-months2">15</span> meses continuos</div>
       </div>
       <div class="bg-slate-800 border-l-4 border-purple-500 p-4 rounded-xl shadow">
         <div class="text-xs font-medium text-slate-400 uppercase">Personal Requerido (personas-día)</div>
@@ -149,6 +149,7 @@
           </select>
         </div>
         <div class="text-xs text-slate-400 font-medium">
+          <button onclick="addMonths()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-semibold mr-3"><i class="fa-solid fa-plus"></i> Agregar mes</button>
           Mostrando <span id="visible-count" class="text-orange-400 font-bold">15</span> meses
         </div>
       </div>
@@ -756,7 +757,15 @@
                   <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${m.period}</span>
                   <h3 class="text-base font-extrabold text-white">${m.month}</h3>
                 </div>
-                ${getRiskBadgeHTML(m.riskType)}
+                <div class="flex flex-col items-end gap-1">
+                  ${getRiskBadgeHTML(m.riskType)}
+                  <div class="flex items-center gap-1">
+                    <select onchange="changeRisk('${m.id}', this.value)" class="bg-slate-900 border border-slate-700 rounded text-[10px] text-slate-300 px-1 py-0.5 focus:outline-none focus:border-orange-500" title="Cambiar tipo de riesgo">
+                      ${RISK_OPTIONS.map(o => `<option value="${o.v}" ${o.v === m.riskType ? 'selected' : ''}>${o.l}</option>`).join('')}
+                    </select>
+                    <button onclick="deleteMonth('${m.id}')" class="text-slate-500 hover:text-red-400 text-[11px]" title="Eliminar este mes"><i class="fa-solid fa-trash"></i></button>
+                  </div>
+                </div>
               </div>
 
               <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50 mb-3 text-xs text-slate-300">
@@ -1497,6 +1506,83 @@
     m.context = t.trim();
     renderAll();
   }
+</script>
+<script>
+  // ===== TIPO DE RIESGO, AGREGAR Y ELIMINAR MESES =====
+  const RISK_OPTIONS = [
+    { v: 'Lluvias/Huracanes', l: 'Lluvias / Monzón' },
+    { v: 'Heladas', l: 'Heladas / Frío' },
+    { v: 'Incendios', l: 'Incendios pastizal' },
+    { v: 'Eventos Masivos', l: 'Eventos masivos' }
+  ];
+  // Riesgo sugerido por mes (solo si no hay un mes anterior del cual copiar)
+  const DEFAULT_RISK = ['Heladas','Incendios','Incendios','Incendios','Lluvias/Huracanes','Lluvias/Huracanes','Lluvias/Huracanes','Lluvias/Huracanes','Eventos Masivos','Lluvias/Huracanes','Eventos Masivos','Heladas'];
+
+  function changeRisk(id, v) {
+    const m = appData.find(x => x.id === id);
+    if (m) { m.riskType = v; renderAll(); }
+  }
+
+  function addMonths() {
+    const last = appData[appData.length - 1];
+    const lp = last.id.split('-');
+    let idx = MONTH_KEYS.indexOf(lp[0]);
+    let year = +lp[1];
+    let n = parseInt(prompt('¿Cuántos meses quieres agregar al final del programa?\n(1 a 12; con 12 agregas un año completo)', '1'));
+    if (!n || n < 1) return;
+    n = Math.min(12, n);
+
+    for (let k = 0; k < n; k++) {
+      idx++;
+      if (idx > 11) { idx = 0; year++; }
+      const id = `${MONTH_KEYS[idx]}-${year}`;
+      if (appData.some(x => x.id === id)) continue;
+      const name = MONTH_NAMES[idx].charAt(0).toUpperCase() + MONTH_NAMES[idx].slice(1);
+      // Base: el mismo mes más reciente que ya exista (ej. para enero 2028 copia enero 2027)
+      const model = [...appData].reverse().find(x => x.id.startsWith(MONTH_KEYS[idx] + '-'));
+      const copy = model
+        ? JSON.parse(JSON.stringify(model))
+        : { context: '', riskType: DEFAULT_RISK[idx], activities: [], expenses: [] };
+      appData.push({
+        id,
+        month: `${name} ${year}`,
+        period: `Q${Math.floor(idx / 3) + 1} ${year}`,
+        context: copy.context,
+        riskType: copy.riskType,
+        activities: copy.activities,
+        expenses: copy.expenses,
+        labor: copy.labor
+      });
+    }
+    renderAll();
+  }
+
+  function deleteMonth(id) {
+    if (appData.length <= 1) { alert('Debe quedar al menos un mes en el programa.'); return; }
+    const m = appData.find(x => x.id === id);
+    if (!m) return;
+    if (confirm(`¿Eliminar ${m.month} completo?\n\nSe borrarán sus actividades, recursos y personal. No se puede deshacer (salvo con Restablecer, que regresa TODO al original).`)) {
+      appData = appData.filter(x => x.id !== id);
+      gridIndex = null;
+      renderAll();
+    }
+  }
+
+  // Semana Santa 2028: Domingo de Ramos (9 abr) a Domingo de Pascua (16 abr)
+  RANGE_EVENTS.push({ y: 2028, m: 4, from: 9, to: 16, t: 'Semana Santa: operativo vacacional', k: 'operativo' });
+
+  // KPIs de meses y período calculados según los meses que existan
+  const _kpisBase = renderKPIs;
+  renderKPIs = function renderKPIs() {
+    _kpisBase();
+    const n = appData.length;
+    if (!n) return;
+    const put = (id, t) => { const e = document.getElementById(id); if (e) e.innerText = t; };
+    const short = m => `${m.month.split(' ')[0].slice(0, 3)} ${m.month.split(' ')[1]}`;
+    put('kpi-months', n);
+    put('kpi-months2', n);
+    put('kpi-period', `${short(appData[0])} – ${short(appData[n - 1])}`);
+  };
 </script>
 </body>
 </html>
