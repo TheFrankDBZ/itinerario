@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Protección Civil Moctezuma - Agenda y Cotizador (2026-2027)</title>
+  <title>Protección Civil Moctezuma - Agenda y Recursos (2026-2027)</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons CDN -->
@@ -82,9 +82,9 @@
     <!-- TARJETAS DE RESUMEN METRICO (KPIs) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 no-print">
       <div class="bg-slate-800 border-l-4 border-orange-500 p-4 rounded-xl shadow">
-        <div class="text-xs font-medium text-slate-400 uppercase">Presupuesto Estimado Total</div>
+        <div class="text-xs font-medium text-slate-400 uppercase">Combustible Requerido</div>
         <div class="text-2xl font-black text-orange-400 mt-1" id="kpi-total-budget">$0 MXN</div>
-        <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-calculator"></i> Basado en partidas cotizadas</div>
+        <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-calculator"></i> Litros en todo el período</div>
       </div>
       <div class="bg-slate-800 border-l-4 border-blue-500 p-4 rounded-xl shadow">
         <div class="text-xs font-medium text-slate-400 uppercase">Total Actividades Programadas</div>
@@ -97,9 +97,9 @@
         <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-calendar"></i> 15 Meses contínuos</div>
       </div>
       <div class="bg-slate-800 border-l-4 border-purple-500 p-4 rounded-xl shadow">
-        <div class="text-xs font-medium text-slate-400 uppercase">Actividades Permanentes</div>
-        <div class="text-2xl font-black text-purple-400 mt-1">5 Programas</div>
-        <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-arrows-spin"></i> Activas todo el año</div>
+        <div class="text-xs font-medium text-slate-400 uppercase">Personal Requerido (personas-día)</div>
+        <div class="text-2xl font-black text-purple-400 mt-1" id="kpi-labor">$0 MXN</div>
+        <div class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-users"></i> Guardias, coordinación y eventuales</div>
       </div>
     </div>
 
@@ -108,8 +108,11 @@
       <button onclick="switchTab('calendar')" id="tab-calendar" class="px-4 py-2.5 font-semibold text-sm rounded-t-lg transition bg-orange-600 text-white border-b-2 border-orange-400">
         <i class="fa-solid fa-calendar-days mr-1.5"></i> Calendarización por Meses
       </button>
+      <button onclick="switchTab('grid')" id="tab-grid" class="px-4 py-2.5 font-semibold text-sm rounded-t-lg transition text-slate-400 hover:text-white">
+        <i class="fa-solid fa-calendar-check mr-1.5"></i> Calendario Visual
+      </button>
       <button onclick="switchTab('budget')" id="tab-budget" class="px-4 py-2.5 font-semibold text-sm rounded-t-lg transition text-slate-400 hover:text-white">
-        <i class="fa-solid fa-coins mr-1.5"></i> Cotizador & Desglose de Gastos
+        <i class="fa-solid fa-coins mr-1.5"></i> Requerimiento de Recursos
       </button>
       <button onclick="switchTab('permanent')" id="tab-permanent" class="px-4 py-2.5 font-semibold text-sm rounded-t-lg transition text-slate-400 hover:text-white">
         <i class="fa-solid fa-arrows-spin mr-1.5"></i> Actividades Permanentes
@@ -147,16 +150,42 @@
       </div>
     </section>
 
+    <!-- SECCIÓN: CALENDARIO VISUAL -->
+    <section id="sec-grid" class="hidden space-y-4">
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md">
+        <div class="flex items-center justify-between mb-3">
+          <button onclick="gridMove(-1)" class="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg text-xs"><i class="fa-solid fa-chevron-left"></i></button>
+          <div class="text-center">
+            <h3 id="grid-title" class="text-lg font-extrabold text-white"></h3>
+            <div id="grid-risk" class="mt-1"></div>
+          </div>
+          <button onclick="gridMove(1)" class="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg text-xs"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-slate-400 font-bold mb-1">
+          <div>DOM</div><div>LUN</div><div>MAR</div><div>MIÉ</div><div>JUE</div><div>VIE</div><div>SÁB</div>
+        </div>
+        <div id="grid-days" class="grid grid-cols-7 gap-1"></div>
+        <div class="flex flex-wrap gap-3 mt-3 text-[10px] text-slate-300">
+          <span><span class="inline-block w-2 h-2 rounded bg-purple-500"></span> Evento masivo</span>
+          <span><span class="inline-block w-2 h-2 rounded bg-blue-500"></span> Temporada / clima</span>
+          <span><span class="inline-block w-2 h-2 rounded bg-orange-500"></span> Operativo</span>
+          <span><span class="inline-block w-2 h-2 rounded bg-emerald-500"></span> Agregado por ti</span>
+          <span class="text-slate-500">· Clic en un día para agregar un evento</span>
+        </div>
+      </div>
+      <div id="grid-events" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+
     <!-- SECCIÓN 2: COTIZADOR Y DESGLOSE DE GASTOS -->
     <section id="sec-budget" class="hidden space-y-4">
       <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-md">
         <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
           <div>
-            <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-calculator text-orange-500 mr-2"></i>Matriz General de Cotización de Recursos</h3>
-            <p class="text-xs text-slate-400">Desglose de gasolina, equipo, consumibles y logística por mes para Protección Civil Moctezuma</p>
+            <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-calculator text-orange-500 mr-2"></i>Matriz General de Requerimiento de Recursos</h3>
+            <p class="text-xs text-slate-400">Recursos humanos, materiales y combustible requeridos por mes. La asignación de presupuesto corresponde a Contabilidad.</p>
           </div>
           <div class="text-right">
-            <div class="text-xs text-slate-400">Total Global Estimado</div>
+            <div class="text-xs text-slate-400">Total requerido</div>
             <div class="text-2xl font-black text-emerald-400" id="matrix-grand-total">$0.00 MXN</div>
           </div>
         </div>
@@ -166,8 +195,8 @@
             <thead class="bg-slate-950 text-slate-200 uppercase font-bold text-[11px] border-b border-slate-700">
               <tr>
                 <th class="p-3">Mes / Período</th>
-                <th class="p-3">Insumos Cotizados</th>
-                <th class="p-3 text-right">Subtotal Estimado</th>
+                <th class="p-3">Recursos Requeridos</th>
+                <th class="p-3 text-right">Resumen</th>
                 <th class="p-3 text-center no-print">Acción</th>
               </tr>
             </thead>
@@ -204,7 +233,7 @@
         <div>
           <h2 class="text-xl font-black uppercase text-slate-900">DIRECCIÓN MUNICIPAL DE PROTECCIÓN CIVIL</h2>
           <h3 class="text-md font-bold text-slate-700">H. Ayuntamiento de Moctezuma, Sonora</h3>
-          <p class="text-xs text-slate-500 mt-1">Programa Operativo y Cotización Estimada (Octubre 2026 – Diciembre 2027)</p>
+          <p class="text-xs text-slate-500 mt-1">Programa Operativo y Requerimiento de Recursos (Octubre 2026 – Diciembre 2027)</p>
         </div>
         <div class="text-right text-xs text-slate-600">
           <p><strong>Fecha de emisión:</strong> <span id="report-date"></span></p>
@@ -215,19 +244,19 @@
       <div>
         <h4 class="font-bold text-sm text-slate-800 uppercase mb-2">1. Resumen Ejecutivo del Programa</h4>
         <p class="text-xs text-slate-700 leading-relaxed">
-          El presente documento establece la planificación operativa y la estimación presupuestal de insumos para la atención de emergencias, mitigación de riesgos de origen natural (crecidas del Río Moctezuma, temperaturas extremas, incendios forestales) y la cobertura de concentraciones masivas en el Municipio de Moctezuma, Sonora.
+          El presente documento establece la planificación operativa y el requerimiento de recursos humanos, materiales y combustible (la asignación presupuestal corresponde a Contabilidad) para la atención de emergencias, mitigación de riesgos de origen natural (crecidas del Río Moctezuma, temperaturas extremas, incendios forestales) y la cobertura de concentraciones masivas en el Municipio de Moctezuma, Sonora.
         </p>
       </div>
 
       <div>
-        <h4 class="font-bold text-sm text-slate-800 uppercase mb-2">2. Presupuesto Consolidado por Período</h4>
+        <h4 class="font-bold text-sm text-slate-800 uppercase mb-2">2. Requerimiento de Recursos por Período</h4>
         <table class="w-full text-xs text-left border border-slate-300 border-collapse">
           <thead>
             <tr class="bg-slate-100 border-b border-slate-300 font-bold">
               <th class="p-2 border-r border-slate-300">Mes</th>
               <th class="p-2 border-r border-slate-300">Contexto y Enfoque de Riesgo</th>
               <th class="p-2 border-r border-slate-300">Actividades Clave</th>
-              <th class="p-2 text-right">Subtotal MXN</th>
+              <th class="p-2">Recursos requeridos</th>
             </tr>
           </thead>
           <tbody id="report-table-body" class="divide-y divide-slate-300">
@@ -235,7 +264,7 @@
           </tbody>
           <tfoot>
             <tr class="bg-slate-200 font-bold border-t border-slate-400">
-              <td colspan="3" class="p-2 text-right">PRESUPUESTO TOTAL ESTIMADO:</td>
+              <td colspan="3" class="p-2 text-right">REQUERIMIENTO TOTAL:</td>
               <td class="p-2 text-right text-sm font-black" id="report-grand-total">$0.00 MXN</td>
             </tr>
           </tfoot>
@@ -616,10 +645,12 @@
     });
 
     function renderAll() {
+      ensureLabor();
       renderKPIs();
       renderMonths();
       renderBudgetMatrix();
       renderPermanents();
+      renderCalendarGrid();
       renderReport();
       saveData();
     }
@@ -636,9 +667,14 @@
     }
 
     // CÁLCULOS PRESUPUESTALES
+    function getLaborSubtotal(month) {
+      return (month.labor || []).reduce((a, l) => a + l.people * l.days * l.rate, 0);
+    }
+
     function getMonthSubtotal(month) {
-      if (!month.expenses) return 0;
-      return month.expenses.reduce((acc, curr) => acc + (curr.qty * curr.unitCost), 0);
+      const labor = getLaborSubtotal(month);
+      if (!month.expenses) return labor;
+      return labor + month.expenses.reduce((acc, curr) => acc + (curr.qty * curr.unitCost), 0);
     }
 
     function getGrandTotal() {
@@ -728,11 +764,11 @@
 
             <div class="border-t border-slate-700 pt-3 flex justify-between items-center mt-2 bg-slate-900/40 p-2 rounded-lg">
               <div>
-                <span class="text-[10px] text-slate-400 block font-semibold">Subtotal Insumos:</span>
-                <span class="text-sm font-black text-emerald-400">$${subtotal.toLocaleString('es-MX', {minimumFractionDigits:2})} MXN</span>
+                <span class="text-[10px] text-slate-400 block font-semibold">Recursos requeridos:</span>
+                <span class="text-xs font-black text-emerald-400">${resumenMes(m)}</span>
               </div>
               <button onclick="openExpenseModal('${m.id}')" class="bg-orange-600 hover:bg-orange-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition shadow">
-                <i class="fa-solid fa-coins"></i> Cotizar Mes
+                <i class="fa-solid fa-boxes-stacked"></i> Recursos
               </button>
             </div>
           `;
@@ -771,6 +807,7 @@
         }
 
         let tr = document.createElement('tr');
+        itemsListHTML += laborHTML(m);
         tr.className = "hover:bg-slate-800/50 transition";
         tr.innerHTML = `
           <td class="p-3 font-bold text-white whitespace-nowrap align-top">
@@ -785,7 +822,7 @@
           </td>
           <td class="p-3 text-center align-top whitespace-nowrap no-print">
             <button onclick="openExpenseModal('${m.id}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-[11px] px-2.5 py-1 rounded font-semibold transition">
-              <i class="fa-solid fa-plus text-orange-400"></i> Cotizar
+              <i class="fa-solid fa-plus text-orange-400"></i> Agregar
             </button>
           </td>
         `;
@@ -836,9 +873,187 @@
       document.getElementById('report-grand-total').innerText = `$${getGrandTotal().toLocaleString('es-MX', {minimumFractionDigits:2})} MXN`;
     }
 
+    // ================= MANO DE OBRA =================
+    // OJO: las tarifas son valores de ejemplo. Cámbialas por las reales del Ayuntamiento.
+    const LABOR_TEMPLATE = [
+      { role: 'Coordinación y supervisión de campo', people: 1, rate: 900, lo: 4, hi: 8 },
+      { role: 'Guardias y horas extra (personal operativo)', people: 3, rate: 600, lo: 4, hi: 10 },
+      { role: 'Brigadistas y voluntarios eventuales', people: 6, rate: 350, lo: 2, hi: 5 }
+    ];
+    const HIGH_LOAD = ['mar', 'abr', 'jun', 'jul', 'ago', 'sep', 'nov', 'dic'];
+
+    function ensureLabor() {
+      appData.forEach(m => {
+        if (!Array.isArray(m.labor)) {
+          const hi = HIGH_LOAD.includes(m.id.split('-')[0]);
+          m.labor = LABOR_TEMPLATE.map(r => ({ role: r.role, people: r.people, rate: r.rate, days: hi ? r.hi : r.lo }));
+        }
+      });
+    }
+
+    function laborHTML(m) {
+      const rows = (m.labor || []).map((l, i) => `
+        <div class="flex flex-wrap items-center justify-between gap-2 py-1 border-b border-slate-800 text-[11px]">
+          <span class="text-slate-300"><i class="fa-solid fa-users text-blue-400 mr-1"></i>${l.role}</span>
+          <div class="flex items-center gap-1 no-print">
+            <input type="number" min="0" value="${l.people}" onchange="updateLabor('${m.id}',${i},'people',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded px-1 py-0.5 text-white" title="Personas">
+            <span class="text-slate-500">pers ×</span>
+            <input type="number" min="0" value="${l.days}" onchange="updateLabor('${m.id}',${i},'days',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded px-1 py-0.5 text-white" title="Días">
+            <span class="text-slate-500">días × $</span>
+            <input type="number" min="0" value="${l.rate}" onchange="updateLabor('${m.id}',${i},'rate',this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded px-1 py-0.5 text-white" title="Pago por día">
+            <button onclick="deleteLabor('${m.id}',${i})" class="text-red-400 hover:text-red-300 ml-1"><i class="fa-solid fa-trash"></i></button>
+          </div>
+          <span class="font-bold text-slate-200">$${(l.people * l.days * l.rate).toLocaleString('es-MX', {minimumFractionDigits:2})}</span>
+        </div>`).join('');
+      return `<div class="mt-2 pt-2 border-t border-slate-600">
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-[10px] font-bold text-blue-300 uppercase tracking-wider">Mano de obra</span>
+          <button onclick="addLabor('${m.id}')" class="text-[10px] text-blue-400 hover:text-blue-300 no-print"><i class="fa-solid fa-plus"></i> Agregar personal</button>
+        </div>${rows}</div>`;
+    }
+
+    function updateLabor(id, i, field, val) {
+      const m = appData.find(x => x.id === id);
+      if (m && m.labor[i]) { m.labor[i][field] = Math.max(0, parseFloat(val) || 0); renderAll(); }
+    }
+    function deleteLabor(id, i) {
+      const m = appData.find(x => x.id === id);
+      if (m) { m.labor.splice(i, 1); renderAll(); }
+    }
+    function addLabor(id) {
+      const role = prompt('Puesto o tipo de personal (ej. Paramédico, Chofer, Vigilante de río):');
+      if (!role) return;
+      const people = parseFloat(prompt('¿Cuántas personas?', '1')) || 1;
+      const days = parseFloat(prompt('¿Cuántos días/guardias en el mes?', '4')) || 1;
+      const rate = parseFloat(prompt('Pago por día ($):', '500')) || 0;
+      const m = appData.find(x => x.id === id);
+      if (m) { m.labor.push({ role, people, days, rate }); renderAll(); }
+    }
+
+    // ================= CALENDARIO VISUAL =================
+    const MONTH_KEYS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    const MONTH_NAMES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const KIND_CLASS = {
+      masivo: 'bg-purple-900/80 text-purple-200',
+      temporada: 'bg-blue-900/80 text-blue-200',
+      operativo: 'bg-orange-900/80 text-orange-200',
+      propio: 'bg-emerald-900/80 text-emerald-200'
+    };
+    // Fechas fijas que se repiten cada año (m = mes 1-12)
+    const FIXED_EVENTS = [
+      { m: 1, d: 1, t: 'Año Nuevo: operativo y control de pirotecnia', k: 'masivo' },
+      { m: 1, d: 6, t: 'Día de Reyes: operativo', k: 'masivo' },
+      { m: 2, d: 14, t: 'San Valentín: eventos y bailes', k: 'masivo' },
+      { m: 4, d: 30, t: 'Día del Niño: eventos escolares', k: 'masivo' },
+      { m: 5, d: 10, t: 'Día de las Madres: eventos masivos', k: 'masivo' },
+      { m: 5, d: 15, t: 'Inicia temporada de huracanes (Pacífico)', k: 'temporada' },
+      { m: 6, d: 15, t: 'Inicia el monzón', k: 'temporada' },
+      { m: 9, d: 15, t: 'Grito de Independencia: operativo', k: 'masivo' },
+      { m: 9, d: 16, t: 'Desfile patrio: operativo', k: 'masivo' },
+      { m: 9, d: 19, t: 'Día Nacional de PC / Simulacro Nacional', k: 'operativo' },
+      { m: 10, d: 1, t: 'Inicio de desazolve y revisión de refugios', k: 'operativo' },
+      { m: 11, d: 1, t: 'Día de Muertos: operativo en panteones', k: 'masivo' },
+      { m: 11, d: 2, t: 'Día de Muertos: operativo en panteones', k: 'masivo' },
+      { m: 11, d: 20, t: 'Desfile 20 de Noviembre', k: 'masivo' },
+      { m: 11, d: 30, t: 'Cierre de temporada de huracanes', k: 'temporada' },
+      { m: 12, d: 12, t: 'Virgen de Guadalupe: operativo y peregrinaciones', k: 'masivo' },
+      { m: 12, d: 24, t: 'Nochebuena: pirotecnia y reuniones', k: 'masivo' },
+      { m: 12, d: 31, t: 'Fin de año: operativo y pirotecnia', k: 'masivo' }
+    ];
+    const RANGE_EVENTS = [
+      { y: 2027, m: 3, from: 21, to: 28, t: 'Semana Santa: operativo vacacional', k: 'operativo' }
+    ];
+    let customEvents = JSON.parse(localStorage.getItem('pc_moctezuma_events')) || {};
+    let gridIndex = null;
+
+    function dayKey(y, m, d) { return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`; }
+
+    function eventsFor(y, m, d) {
+      const key = dayKey(y, m, d);
+      const list = [];
+      FIXED_EVENTS.filter(e => e.m === m && e.d === d).forEach(e => list.push({ t: e.t, k: e.k }));
+      RANGE_EVENTS.filter(e => e.y === y && e.m === m && d >= e.from && d <= e.to).forEach(e => list.push({ t: e.t, k: e.k }));
+      (customEvents[key] || []).forEach((t, i) => list.push({ t, k: 'propio', key, i }));
+      return list;
+    }
+
+    function renderCalendarGrid() {
+      const box = document.getElementById('grid-days');
+      if (!box) return;
+      if (gridIndex === null) {
+        const now = new Date();
+        const idx = appData.findIndex(x => {
+          const p = x.id.split('-');
+          return MONTH_KEYS.indexOf(p[0]) === now.getMonth() && +p[1] === now.getFullYear();
+        });
+        gridIndex = idx >= 0 ? idx : 0;
+      }
+      const mo = appData[gridIndex];
+      const p = mo.id.split('-');
+      const y = +p[1], m = MONTH_KEYS.indexOf(p[0]) + 1;
+      const offset = new Date(y, m - 1, 1).getDay();
+      const total = new Date(y, m, 0).getDate();
+      const now = new Date();
+
+      document.getElementById('grid-title').innerText = mo.month;
+      document.getElementById('grid-risk').innerHTML = getRiskBadgeHTML(mo.riskType);
+
+      let html = '<div></div>'.repeat(offset);
+      let listHTML = '';
+      for (let d = 1; d <= total; d++) {
+        const evs = eventsFor(y, m, d);
+        const isToday = now.getFullYear() === y && now.getMonth() + 1 === m && now.getDate() === d;
+        html += `<button onclick="addDayEvent(${y},${m},${d})" class="min-h-[64px] sm:min-h-[88px] text-left p-1 rounded-lg border ${isToday ? 'border-orange-500 bg-orange-950/40' : 'border-slate-700 bg-slate-900'} hover:bg-slate-700 transition overflow-hidden">
+          <span class="text-[11px] font-bold ${isToday ? 'text-orange-400' : 'text-slate-300'}">${d}</span>
+          ${evs.map(e => `<div class="text-[9px] leading-tight rounded px-1 mt-0.5 truncate ${KIND_CLASS[e.k]}">${e.t}</div>`).join('')}
+        </button>`;
+        evs.forEach(e => {
+          listHTML += `<li class="flex justify-between items-start gap-2 text-xs text-slate-300">
+            <span><strong class="text-white">${d} de ${MONTH_NAMES[m - 1]}:</strong> ${e.t}</span>
+            ${e.k === 'propio' ? `<button onclick="deleteDayEvent('${e.key}',${e.i})" class="text-red-400 hover:text-red-300 text-[10px]"><i class="fa-solid fa-trash"></i></button>` : ''}
+          </li>`;
+        });
+      }
+      box.innerHTML = html;
+
+      document.getElementById('grid-events').innerHTML = `
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <h4 class="text-xs font-bold text-orange-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calendar-day mr-1"></i> Fechas del mes</h4>
+          <ul class="space-y-1.5">${listHTML || '<li class="text-xs text-slate-500 italic">Sin fechas registradas. Da clic en un día para agregar.</li>'}</ul>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <h4 class="text-xs font-bold text-orange-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-list-check mr-1"></i> Actividades del mes (sin fecha fija)</h4>
+          <ul class="space-y-1.5">${mo.activities.map(a => `<li class="text-xs text-slate-300 flex gap-2"><i class="fa-solid fa-circle-check text-orange-500 text-[10px] mt-1"></i>${a}</li>`).join('')}</ul>
+          <div class="mt-3 pt-2 border-t border-slate-700 text-xs text-slate-400">Recursos del mes: <strong class="text-emerald-400">${resumenMes(mo)}</strong></div>
+        </div>`;
+    }
+
+    function gridMove(delta) {
+      gridIndex = Math.max(0, Math.min(appData.length - 1, gridIndex + delta));
+      renderCalendarGrid();
+    }
+
+    function addDayEvent(y, m, d) {
+      const t = prompt(`Evento para el ${d} de ${MONTH_NAMES[m - 1]} de ${y}\n(ej. Feria de la Talabartería, Cabalgata La Mesa):`);
+      if (!t || !t.trim()) return;
+      const key = dayKey(y, m, d);
+      (customEvents[key] = customEvents[key] || []).push(t.trim());
+      localStorage.setItem('pc_moctezuma_events', JSON.stringify(customEvents));
+      renderCalendarGrid();
+    }
+
+    function deleteDayEvent(key, i) {
+      if (customEvents[key]) {
+        customEvents[key].splice(i, 1);
+        if (!customEvents[key].length) delete customEvents[key];
+        localStorage.setItem('pc_moctezuma_events', JSON.stringify(customEvents));
+        renderCalendarGrid();
+      }
+    }
+
     // CONTROL DE PESTAÑAS
     function switchTab(tab) {
-      ['calendar', 'budget', 'permanent', 'report'].forEach(t => {
+      ['calendar', 'grid', 'budget', 'permanent', 'report'].forEach(t => {
         document.getElementById(`sec-${t}`).classList.add('hidden');
         const btn = document.getElementById(`tab-${t}`);
         btn.classList.remove('bg-orange-600', 'text-white', 'border-b-2', 'border-orange-400');
@@ -938,6 +1153,10 @@
         }
       });
 
+      appData.forEach(m => (m.labor || []).forEach(l => {
+        csvContent += `"${m.month}","${m.period}","${m.riskType}","Mano de obra: ${l.role}",${l.people * l.days},"persona-día",${l.rate},${l.people * l.days * l.rate}\n`;
+      }));
+
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
@@ -947,5 +1166,179 @@
       document.body.removeChild(link);
     }
   </script>
+<script>
+  // ===== REQUERIMIENTO DE RECURSOS (sin dinero) =====
+  // renderAll blindado: si una sección falla, las demás se dibujan igual
+  function renderAll() {
+    ensureLabor();
+    [renderKPIs, renderMonths, renderBudgetMatrix, renderPermanents, renderCalendarGrid, renderReport, saveData].forEach(fn => {
+      try { fn(); } catch (e) { console.error('ERROR en ' + fn.name + ':', e); }
+    });
+  }
+  // Este bloque reemplaza las versiones anteriores de estas funciones.
+  function fmt(n) { return (Math.round(n * 100) / 100).toLocaleString('es-MX'); }
+
+  function getPersonDays(m) { return (m.labor || []).reduce((a, l) => a + l.people * l.days, 0); }
+  // El combustible se cuenta cuando la unidad contiene "litro" (litros, litro)
+  function getFuel(m) { return (m.expenses || []).filter(e => /litro/i.test(e.unit)).reduce((a, e) => a + e.qty, 0); }
+
+  function resumenMes(m) {
+    return `${fmt(getFuel(m))} L de combustible · ${fmt(getPersonDays(m))} personas-día · ${(m.expenses || []).length} partidas`;
+  }
+  function totalResumen() {
+    const fuel = appData.reduce((a, m) => a + getFuel(m), 0);
+    const pd = appData.reduce((a, m) => a + getPersonDays(m), 0);
+    return `${fmt(fuel)} L · ${fmt(pd)} pers-día`;
+  }
+
+  function getConcentrado() {
+    const map = {};
+    const add = (u, q) => { map[u] = map[u] || { qty: 0, n: 0 }; map[u].qty += q; map[u].n++; };
+    appData.forEach(m => {
+      (m.expenses || []).forEach(e => add((e.unit || 'sin unidad').trim().toLowerCase(), e.qty));
+      (m.labor || []).forEach(l => add('persona-día', l.people * l.days));
+    });
+    return map;
+  }
+
+  function renderKPIs() {
+    const fuel = appData.reduce((a, m) => a + getFuel(m), 0);
+    const pd = appData.reduce((a, m) => a + getPersonDays(m), 0);
+    document.getElementById('kpi-total-budget').innerText = `${fmt(fuel)} L`;
+    document.getElementById('kpi-total-activities').innerText = getTotalActivitiesCount();
+    document.getElementById('kpi-labor').innerText = `${fmt(pd)} pers-día`;
+  }
+
+  function laborHTML(m) {
+    const rows = (m.labor || []).map((l, i) => `
+      <div class="flex flex-wrap items-center justify-between gap-2 py-1 border-b border-slate-800 text-[11px]">
+        <span class="text-slate-300"><i class="fa-solid fa-users text-blue-400 mr-1"></i>${l.role}</span>
+        <div class="flex items-center gap-1">
+          <input type="number" min="0" value="${l.people}" onchange="updateLabor('${m.id}',${i},'people',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded px-1 py-0.5 text-white" title="Personas">
+          <span class="text-slate-500">pers ×</span>
+          <input type="number" min="0" value="${l.days}" onchange="updateLabor('${m.id}',${i},'days',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded px-1 py-0.5 text-white" title="Días">
+          <span class="text-slate-500">días =</span>
+          <span class="font-bold text-slate-200 w-14 text-right">${fmt(l.people * l.days)} p-d</span>
+          <button onclick="deleteLabor('${m.id}',${i})" class="text-red-400 hover:text-red-300 ml-1 no-print"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>`).join('');
+    return `<div class="mt-2 pt-2 border-t border-slate-600">
+      <div class="flex justify-between items-center mb-1">
+        <span class="text-[10px] font-bold text-blue-300 uppercase tracking-wider">Personal requerido</span>
+        <button onclick="addLabor('${m.id}')" class="text-[10px] text-blue-400 hover:text-blue-300 no-print"><i class="fa-solid fa-plus"></i> Agregar personal</button>
+      </div>${rows}</div>`;
+  }
+
+  function addLabor(id) {
+    const role = prompt('Puesto o tipo de personal (ej. Paramédico, Chofer, Vigilante de río):');
+    if (!role) return;
+    const people = parseFloat(prompt('¿Cuántas personas?', '1')) || 1;
+    const days = parseFloat(prompt('¿Cuántos días/guardias en el mes?', '4')) || 1;
+    const m = appData.find(x => x.id === id);
+    if (m) { m.labor.push({ role, people, days, rate: 0 }); renderAll(); }
+  }
+
+  function updateExpenseQty(id, i, val) {
+    const m = appData.find(x => x.id === id);
+    if (m && m.expenses[i]) { m.expenses[i].qty = Math.max(0, parseFloat(val) || 0); renderAll(); }
+  }
+
+  function renderBudgetMatrix() {
+    const tbody = document.getElementById('budget-table-body');
+    tbody.innerHTML = '';
+
+    appData.forEach(m => {
+      let items = (m.expenses && m.expenses.length > 0)
+        ? m.expenses.map((exp, idx) => `
+          <div class="flex flex-wrap justify-between items-center gap-2 py-1 border-b border-slate-800 text-[11px]">
+            <span class="text-slate-300"><i class="fa-solid fa-angle-right text-orange-500 mr-1"></i>${exp.concept}</span>
+            <div class="flex items-center gap-1">
+              <input type="number" min="0" step="any" value="${exp.qty}" onchange="updateExpenseQty('${m.id}',${idx},this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded px-1 py-0.5 text-white">
+              <span class="text-slate-300 w-16">${exp.unit}</span>
+              <button onclick="deleteExpenseItem('${m.id}', ${idx})" class="text-red-400 hover:text-red-300 text-[10px] no-print" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>`).join('')
+        : `<span class="text-slate-500 italic text-[11px]">Sin recursos materiales requeridos para este mes.</span>`;
+      items += laborHTML(m);
+
+      const tr = document.createElement('tr');
+      tr.className = "hover:bg-slate-800/50 transition";
+      tr.innerHTML = `
+        <td class="p-3 font-bold text-white whitespace-nowrap align-top">${m.month}<div class="text-[10px] font-normal text-slate-400">${m.period}</div></td>
+        <td class="p-3 align-top"><div class="space-y-1">${items}</div></td>
+        <td class="p-3 text-right font-bold text-emerald-400 align-top text-[11px]">${resumenMes(m)}</td>
+        <td class="p-3 text-center align-top whitespace-nowrap no-print">
+          <button onclick="openExpenseModal('${m.id}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-[11px] px-2.5 py-1 rounded font-semibold transition">
+            <i class="fa-solid fa-plus text-orange-400"></i> Agregar
+          </button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    const c = getConcentrado();
+    const units = Object.keys(c).sort((a, b) => c[b].qty - c[a].qty);
+    document.getElementById('resource-summary').innerHTML = `
+      <div class="bg-slate-900 border border-slate-700 rounded-lg p-3">
+        <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-clipboard-list mr-1"></i> Concentrado para Contabilidad (total por tipo de unidad)</h4>
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+          ${units.map(u => `<div class="bg-slate-800 rounded p-2"><div class="text-lg font-black text-white">${fmt(c[u].qty)}</div><div class="text-[10px] text-slate-400">${u} · ${c[u].n} partidas</div></div>`).join('')}
+        </div>
+      </div>`;
+    document.getElementById('matrix-grand-total').innerText = totalResumen();
+  }
+
+  function recursosListHTML(m) {
+    const ex = (m.expenses || []).map(e => `<li>${e.concept}: <strong>${fmt(e.qty)} ${e.unit}</strong></li>`).join('');
+    const lb = (m.labor || []).filter(l => l.people * l.days > 0).map(l => `<li>${l.role}: <strong>${l.people} pers × ${l.days} días</strong></li>`).join('');
+    return `<ul class="list-disc pl-3 space-y-0.5">${ex}${lb}</ul>`;
+  }
+
+  function renderReport() {
+    const tbody = document.getElementById('report-table-body');
+    tbody.innerHTML = '';
+    appData.forEach(m => {
+      const tr = document.createElement('tr');
+      tr.className = "text-[11px]";
+      tr.innerHTML = `
+        <td class="p-2 border-r border-slate-300 font-bold whitespace-nowrap align-top">${m.month}</td>
+        <td class="p-2 border-r border-slate-300 text-slate-700 align-top">${m.context}</td>
+        <td class="p-2 border-r border-slate-300 text-slate-700 align-top"><ul class="list-disc pl-3 space-y-0.5">${m.activities.map(a => `<li>${a}</li>`).join('')}</ul></td>
+        <td class="p-2 text-slate-700 align-top">${recursosListHTML(m)}</td>`;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('report-grand-total').innerText = totalResumen();
+  }
+
+  function openExpenseModal(monthId) {
+    document.getElementById('modal-month-id').value = monthId;
+    const m = appData.find(x => x.id === monthId);
+    document.getElementById('modal-title').innerText = `Agregar recurso para: ${m.month}`;
+    document.getElementById('expenseForm').reset();
+    const cost = document.getElementById('expense-cost');
+    cost.required = false;
+    cost.parentElement.classList.add('hidden');
+    cost.parentElement.parentElement.className = 'grid grid-cols-2 gap-3';
+    document.getElementById('modal-calculated-total').parentElement.classList.add('hidden');
+    document.getElementById('expenseModal').classList.remove('hidden');
+  }
+
+  function exportToCSV() {
+    const q = s => `"${String(s).replace(/"/g, '""')}"`;
+    let csv = "Mes,Periodo,Tipo Riesgo,Tipo,Concepto,Cantidad,Unidad\n";
+    appData.forEach(m => {
+      (m.expenses || []).forEach(e => { csv += [q(m.month), q(m.period), q(m.riskType), q('Recurso material'), q(e.concept), e.qty, q(e.unit)].join(',') + '\n'; });
+      (m.labor || []).forEach(l => { csv += [q(m.month), q(m.period), q(m.riskType), q('Personal'), q(l.role), l.people * l.days, q('persona-día')].join(',') + '\n'; });
+    });
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'requerimiento_recursos_proteccion_civil_moctezuma.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+</script>
 </body>
 </html>
