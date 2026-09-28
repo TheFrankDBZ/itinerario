@@ -738,10 +738,12 @@
           visibleCount++;
           const subtotal = getMonthSubtotal(m);
 
-          let activitiesHTML = m.activities.map(act => `
+          let activitiesHTML = m.activities.map((act, ai) => `
             <li class="flex items-start gap-2 text-xs text-slate-300">
               <i class="fa-solid fa-circle-check text-orange-500 text-[10px] mt-1 shrink-0"></i>
-              <span>${act}</span>
+              <span class="flex-1">${act}</span>
+              <button onclick="editActivity('${m.id}',${ai})" class="text-slate-400 hover:text-blue-300 text-[11px] shrink-0" title="Editar"><i class="fa-solid fa-pen"></i></button>
+              <button onclick="deleteActivity('${m.id}',${ai})" class="text-slate-400 hover:text-red-400 text-[11px] shrink-0" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
             </li>
           `).join('');
 
@@ -758,7 +760,10 @@
               </div>
 
               <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/50 mb-3 text-xs text-slate-300">
-                <strong class="text-orange-400 block mb-0.5"><i class="fa-solid fa-compass"></i> Contexto Regional:</strong>
+                <div class="flex justify-between items-center mb-0.5">
+                  <strong class="text-orange-400"><i class="fa-solid fa-compass"></i> Contexto Regional:</strong>
+                  <button onclick="editContext('${m.id}')" class="text-slate-400 hover:text-blue-300 text-[11px]" title="Editar contexto"><i class="fa-solid fa-pen"></i></button>
+                </div>
                 ${m.context}
               </div>
 
@@ -1462,6 +1467,35 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+</script>
+<script>
+  // ===== EDITAR / ELIMINAR EN CALENDARIZACIÓN POR MESES =====
+  function editActivity(id, i) {
+    const m = appData.find(x => x.id === id);
+    if (!m || m.activities[i] === undefined) return;
+    const t = prompt('Editar actividad:', m.activities[i]);
+    if (t === null || !t.trim()) return;
+    m.activities[i] = t.trim();
+    renderAll();
+  }
+
+  function deleteActivity(id, i) {
+    const m = appData.find(x => x.id === id);
+    if (!m || m.activities[i] === undefined) return;
+    if (confirm('¿Eliminar esta actividad?\n\n' + m.activities[i])) {
+      m.activities.splice(i, 1);
+      renderAll();
+    }
+  }
+
+  function editContext(id) {
+    const m = appData.find(x => x.id === id);
+    if (!m) return;
+    const t = prompt('Editar contexto regional de ' + m.month + ':', m.context);
+    if (t === null || !t.trim()) return;
+    m.context = t.trim();
+    renderAll();
   }
 </script>
 </body>
